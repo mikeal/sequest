@@ -1,0 +1,33 @@
+{
+  "name": "sequest",
+  "version": "0.0.0",
+  "description": "Simplified API for SSH and SFTP similar to request.",
+  "main": "index.js",
+  "dependencies": {
+    "ssh2": "^0.2.25",
+    "bl": "^0.8.0"
+  },
+  "devDependencies": {
+    "tape": "^2.13.2"
+  },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikeal/sequest"
+  },
+  "keywords": [
+    "ssh",
+    "ssh2",
+    "sftp",
+    "scp",
+    "request"
+  ],
+  "author": "Mikeal Rogers <mikeal.rogers@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mikeal/sequest/issues"
+  },
+  "homepage": "https://github.com/mikeal/sequest"
+}
