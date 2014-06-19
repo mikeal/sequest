@@ -1,5 +1,5 @@
 {
-  "name": "sequester",
+  "name": "sequest",
   "version": "0.3.0",
   "description": "Simplified API for SSH and SFTP similar to request.",
   "main": "index.js",
