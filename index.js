@@ -9,6 +9,7 @@ function getConnection (str, opts) {
     , port = 22
     , host
     ;
+  opts = opts || {}
   if (str.indexOf('@') !== -1) {
     user = str.slice(0, str.indexOf('@'))
     str = str.slice(str.indexOf('@')+1)
@@ -116,7 +117,7 @@ Sequest.prototype.__write = function (chunk, encoding, cb) {
         })
         stream.on('close', function () {
           self.emit('exec', e, cmd, code, signal, stdout.toString(), stderr.toString())
-          if (self.opts.command) self.connection.end()
+          if (self.opts.command && !self.leaveOpen) self.connection.end()
         })
       }
     })
@@ -146,3 +147,16 @@ function sequest (remote, command, cb) {
   return new Sequest(remote, command, cb)
 }
 module.exports = sequest
+module.exports.getConnection = getConnection
+module.exports.connect = function (host, opts) {
+  var conn = getConnection(host, opts)
+  function ret () {
+    var args = [conn].concat(Array.prototype.slice.call(arguments))
+      , r = sequest.apply(sequest, args)
+      ;
+    r.leaveOpen = true
+    return r
+  }
+  ret.end = function () {conn.end()}
+  return ret
+}
