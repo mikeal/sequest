@@ -1,4 +1,4 @@
-var sequest = require('./')
+var sequest = require('../')
   , tape = require('tape')
   , user = process.env.USER
   , host = user+'@localhost'

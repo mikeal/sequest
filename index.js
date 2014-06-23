@@ -58,6 +58,7 @@ function Sequest (conn, opts, cb) {
   this.queue = []
   this.dests = []
   this.sources = []
+  if (opts.continuous) this.bufferStream = new stream.PassThrough()
 
   if (conn._state !== 'authenticated') {
     this.connection.on('ready', this.onConnectionReady.bind(this))
@@ -91,25 +92,31 @@ Sequest.prototype.onConnectionReady = function () {
       if (e) self.emit('error', e)
       else self.emit('end')
     })
+  } else if (this.opts.continuous) {
+    if (this.pending) this.__write.apply(this, this.pending)
   }
 }
 Sequest.prototype.__write = function (chunk, encoding, cb) {
   var self = this
   if (this.opts.command || this.opts.continuous) {
     var cmd = chunk.toString()
+    this.executing = true
     this.connection.exec(cmd, function (e, stream) {
+      self.executing = false
       if (e) {
         self.emit('exec', e, cmd)
         return cb(e)
       }
       self._pipeDests(stream)
+      var signal
+        , code
+        ;
       if (self.cb) {
         var stdout = bl()
           , stderr = bl()
-          , signal
-          , code
           ;
         stream.pipe(stdout)
+
         if (stream.stderr) stream.stderr.pipe(stderr)
         stream.on('exit', function (_code, _signal) {
           signal = _signal
@@ -118,20 +125,41 @@ Sequest.prototype.__write = function (chunk, encoding, cb) {
         stream.on('close', function () {
           self.emit('exec', e, cmd, code, signal, stdout.toString(), stderr.toString())
           if (self.opts.command && !self.leaveOpen) self.connection.end()
+          cb()
+        })
+      } else {
+        if (self.bufferStream) stream.pipe(self.bufferStream, {end:false})
+        if (e) {
+          if (!self.leaveOpen) self.connection.end()
+          return self.emit('error', e)
+        }
+        stream.on('exit', function (_code, _signal) {
+          signal = _signal
+          code = _code
+          if (code) {
+            if (!self.leaveOpen) self.connection.end()
+            return self.emit('error', new Error('Exit code non-zero, '+code))
+          }
+        })
+        stream.on('close', function () {
+          self.emit('exec', e, cmd, code, signal)
+          if (!code) cb()
         })
       }
     })
   } else if (this.path) {
-    this.push(chunk)
-    cb()
+    // TODO: implement sftp push
   }
 }
 Sequest.prototype._write = function (chunk, encoding, cb) {
   if (!this.isReady) {
-    this.queue.push([chunk, encoding, cb])
+    this.pending = [chunk, encoding, cb]
   } else {
     this.__write(chunk, encoding, cb)
   }
+}
+Sequest.prototype._read = function (size) {
+  return this.bufferStream.read(size)
 }
 Sequest.prototype.pipe = function () {
   this.dests.push(arguments[0])
@@ -141,6 +169,10 @@ Sequest.prototype._pipeDests = function (stream) {
   this.dests.forEach(function (dest) {
     stream.pipe(dest, {end:false})
   })
+}
+Sequest.prototype.end = function () {
+  if (!this.leaveOpen) this.connection.end()
+  stream.Duplex.prototype.end.apply(this, arguments)
 }
 
 function sequest (remote, command, cb) {
@@ -155,6 +187,7 @@ module.exports.connect = function (host, opts) {
       , r = sequest.apply(sequest, args)
       ;
     r.leaveOpen = true
+    if (r.onCall) r.onCall(r)
     return r
   }
   ret.end = function () {conn.end()}
