@@ -1,4 +1,4 @@
-## Sequest -- Simple ssh client API, inspired by request
+## Sequest -- Simple ssh client, inspired by request
 
 ```javascript
 var sequest = require('sequest')
