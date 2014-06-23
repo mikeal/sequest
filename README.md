@@ -24,7 +24,7 @@ seq('ls', function (e, stdout) {
 
 ```javascript
 var seq = sequest('root@127.0.0.1')
-seq.pipe(process.stdout)
+seq.pipe(process.stdout) // only necessary if you want to see the output in your terminal
 seq.write('ls -la')
 seq.write('touch testfile')
 seq.write('ls -la')
