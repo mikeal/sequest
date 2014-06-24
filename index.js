@@ -191,5 +191,86 @@ module.exports.connect = function (host, opts) {
     return r
   }
   ret.end = function () {conn.end()}
+  ret.put = function () {
+    var args = [conn].concat(Array.prototype.slice.call(arguments))
+      , r = sequest.put.apply(sequest, args)
+      ;
+    r.leaveOpen = true
+    if (r.onCall) r.onCall(r)
+    return r
+  }
+  ret.get = function () {
+    var args = [conn].concat(Array.prototype.slice.call(arguments))
+      , r = sequest.get.apply(sequest, args)
+      ;
+    r.leaveOpen = true
+    if (r.onCall) r.onCall(r)
+    return r
+  }
   return ret
+}
+
+function SequestPut (conn, opts, path) {
+  stream.PassThrough.call(this)
+  if (!path) {
+    path = opts
+    opts = {}
+  }
+  if (typeof conn === 'string') {
+    var conn = getConnection(conn, opts)
+  }
+
+  this.connection = conn
+  this.opts = opts
+  this.path = path
+  var self = this
+  if (conn._state !== 'authenticated') {
+    this.connection.on('ready', this.onConnectionReady.bind(this))
+  } else {
+    process.nextTick(function () {
+      self.onConnectionReady()
+    })
+  }
+}
+util.inherits(SequestPut, stream.PassThrough)
+SequestPut.prototype.onConnectionReady = function () {
+  var self = this
+  this.connection.sftp(function (err, sftp) {
+    if (err) self.emit('error', err)
+    var stream = sftp.createWriteStream(self.path, self.opts)
+    self.pipe(stream)
+    self.stream = stream
+    stream.on('close', function () {
+      self.emit('close')
+      if (!self.leaveOpen) self.connection.end()
+    })
+  })
+}
+
+function SequestGet (conn, opts, path) {
+  SequestPut.call(this, conn, opts, path)
+}
+util.inherits(SequestGet, SequestPut)
+SequestGet.prototype.onConnectionReady = function () {
+  var self = this
+  this.connection.sftp(function (err, sftp) {
+    if (err) self.emit('error', err)
+    var stream = sftp.createReadStream(self.path, self.opts)
+    stream.pipe(self)
+    self.stream = stream
+    if (!self.leaveOpen) {
+      self.on('end', function () {
+        self.connection.end()
+      })
+    }
+  })
+}
+SequestGet.prototype.end = stream.PassThrough.prototype.end
+
+
+module.exports.put = function (conn, path, opts) {
+  return new SequestPut(conn, opts, path)
+}
+module.exports.get = function (conn, path, opts) {
+  return new SequestGet(conn, opts, path)
 }
