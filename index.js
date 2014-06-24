@@ -2,6 +2,7 @@ var Connection = require('ssh2')
   , stream = require('stream')
   , util = require('util')
   , bl = require('bl')
+  , once = require('once')
   ;
 
 function getConnection (str, opts) {
@@ -54,24 +55,29 @@ function Sequest (conn, opts, cb) {
 
   this.connection = conn
   this.opts = opts
-  this.cb = cb
+  if (cb) this.cb = once(cb)
   this.queue = []
   this.dests = []
   this.sources = []
   if (opts.continuous) this.bufferStream = new stream.PassThrough()
 
   if (conn._state !== 'authenticated') {
+    var self = this
+    this.onError = function (e) { self.emit('error', e) }
+    this.connection.on('error', this.onError)
     this.connection.on('ready', this.onConnectionReady.bind(this))
   } else {
     this.onConnectionReady()
   }
   this.on('pipe', this.sources.push.bind(this.sources))
+  if (this.cb) this.on('error', this.cb)
 }
 util.inherits(Sequest, stream.Duplex)
 
 Sequest.prototype.onConnectionReady = function () {
   var self = this
   this.isReady = true
+  if (this.onError) this.removeListener('error', this.onError)
   if (this.opts.command) {
     this.write(this.opts.command)
     var cb = this.cb
@@ -189,6 +195,7 @@ module.exports.connect = function (host, opts) {
       ;
     r.leaveOpen = true
     if (r.onCall) r.onCall(r)
+    if (ret.onError) r.on('error', ret.onError)
     return r
   }
   ret.end = function () {conn.end()}
@@ -198,6 +205,7 @@ module.exports.connect = function (host, opts) {
       ;
     r.leaveOpen = true
     if (r.onCall) r.onCall(r)
+    if (ret.onError) r.on('error', ret.onError)
     return r
   }
   ret.get = function () {
@@ -206,6 +214,7 @@ module.exports.connect = function (host, opts) {
       ;
     r.leaveOpen = true
     if (r.onCall) r.onCall(r)
+    if (ret.onError) r.on('error', ret.onError)
     return r
   }
   return ret
@@ -241,6 +250,9 @@ SequestPut.prototype.onConnectionReady = function () {
     var stream = sftp.createWriteStream(self.path, self.opts)
     self.pipe(stream)
     self.stream = stream
+    stream.on('error', function (e) {
+      self.emit('error', e)
+    })
     stream.on('close', function () {
       self.emit('close')
       if (!self.leaveOpen) self.connection.end()
@@ -259,6 +271,9 @@ SequestGet.prototype.onConnectionReady = function () {
     var stream = sftp.createReadStream(self.path, self.opts)
     stream.pipe(self)
     self.stream = stream
+    stream.on('error', function (e) {
+      self.emit('error', e)
+    })
     if (!self.leaveOpen) {
       self.on('end', function () {
         self.connection.end()
