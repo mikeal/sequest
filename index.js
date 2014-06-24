@@ -192,7 +192,7 @@ module.exports.connect = function (host, opts) {
       ;
     r.leaveOpen = true
     if (r.onCall) r.onCall(r)
-    if (r.onError) r.on('error', r.onError)
+    if (ret.onError) r.on('error', r.onError)
     return r
   }
   ret.end = function () {conn.end()}
@@ -202,7 +202,7 @@ module.exports.connect = function (host, opts) {
       ;
     r.leaveOpen = true
     if (r.onCall) r.onCall(r)
-    if (r.onError) r.on('error', r.onError)
+    if (ret.onError) r.on('error', r.onError)
     return r
   }
   ret.get = function () {
@@ -211,7 +211,7 @@ module.exports.connect = function (host, opts) {
       ;
     r.leaveOpen = true
     if (r.onCall) r.onCall(r)
-    if (r.onError) r.on('error', r.onError)
+    if (ret.onError) r.on('error', r.onError)
     return r
   }
   return ret
