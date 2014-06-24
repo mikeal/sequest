@@ -2,6 +2,7 @@ var Connection = require('ssh2')
   , stream = require('stream')
   , util = require('util')
   , bl = require('bl')
+  , once = require('once')
   ;
 
 function getConnection (str, opts) {
@@ -54,7 +55,7 @@ function Sequest (conn, opts, cb) {
 
   this.connection = conn
   this.opts = opts
-  this.cb = cb
+  if (cb) this.cb = once(cb)
   this.queue = []
   this.dests = []
   this.sources = []
@@ -69,6 +70,7 @@ function Sequest (conn, opts, cb) {
     this.onConnectionReady()
   }
   this.on('pipe', this.sources.push.bind(this.sources))
+  if (this.cb) this.on('error', this.cb)
 }
 util.inherits(Sequest, stream.Duplex)
 
