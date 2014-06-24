@@ -117,3 +117,7 @@ Default options, as defined by [ssh2](https://github.com/mscdex/ssh2#sftp-method
   autoClose: true
 }
 ```
+
+## Credits
+
+This would not be possible without [Brian White](https://github.com/mscdex)'s amazing [ssh2](https://github.com/mscdex/ssh2) module.
