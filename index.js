@@ -87,11 +87,12 @@ Sequest.prototype.onConnectionReady = function () {
         }
         cb(e, stdout, o)
       })
+    } else {
+      this.once('exec', function (e) {
+        if (e) self.emit('error', e)
+        else self.emit('end')
+      })
     }
-    this.once('exec', function (e) {
-      if (e) self.emit('error', e)
-      else self.emit('end')
-    })
   } else if (this.opts.continuous) {
     if (this.pending) this.__write.apply(this, this.pending)
   }
