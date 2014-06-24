@@ -1,5 +1,7 @@
 ## Sequest -- Simple ssh client, inspired by request
 
+By default sequest will use your local `ssh-agent` to authenticate to remote hosts which should make it unnecessary to enter username, password or privateKey information.
+
 ```javascript
 var sequest = require('sequest')
 sequest('root@127.0.0.1', 'ls' function (e, stdout) {
@@ -32,3 +34,41 @@ seq.end()
 ```
 
 Each command will complete before the next is sent to the server. If any command returns a non-zero exit code it will emit an error which effectively ends the stream and the processing of subsequent commands.
+
+## Get
+
+```javscript
+var reader = sequest.get('root@127.0.0.1', '/remote/path/to/file')
+reader.pipe(process.stdout)
+```
+
+Also works with `.connect()`
+
+```javascript
+var c = sequest.connect('root@127.0.0.1')
+  , reader = c.get('/remote/path/to/file')
+  ;
+reader.pipe(process.stdout)
+```
+
+## Put
+
+```javscript
+var writer = sequest.put('root@127.0.0.1', '/remote/path/to/file')
+fs.createReadStream('/local/path').pipe(writer)
+writer.on('close', function () {
+  // finished writing.
+})
+```
+
+Also works with `.connect()`
+
+```javascript
+var c = sequest.connect('root@127.0.0.1')
+  , writer = c.put('/remote/path/to/file')
+  ;
+fs.createReadStream('/local/path').pipe(writer)
+writer.on('close', function () {
+  // finished writing.
+})
+```
