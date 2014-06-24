@@ -57,7 +57,8 @@ seq('ls', function (e, stdout) {
 })
 ```
 
-## `.get(host, path[, opts])` get remote file
+## `.get(host, path[, opts])`
+### get remote file
 
 ```javascript
 var reader = sequest.get('root@127.0.0.1', '/remote/path/to/file')
@@ -84,7 +85,8 @@ Default options, as defined by [ssh2](https://github.com/mscdex/ssh2#sftp-method
 ```
 
 
-## `.put(host, path[, opts])` write remote file
+## `.put(host, path[, opts])`
+### write remote file
 
 ```javascript
 var writer = sequest.put('root@127.0.0.1', '/remote/path/to/file')
