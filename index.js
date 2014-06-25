@@ -59,7 +59,7 @@ function Sequest (conn, opts, cb) {
   this.queue = []
   this.dests = []
   this.sources = []
-  if (opts.continuous) this.bufferStream = new stream.PassThrough()
+  this.bufferStream = new stream.PassThrough()
 
   if (conn._state !== 'authenticated') {
     var self = this
@@ -115,6 +115,8 @@ Sequest.prototype.__write = function (chunk, encoding, cb) {
         return cb(e)
       }
       self._pipeDests(stream)
+
+      stream.pipe(self.bufferStream, {end:false})
       var signal
         , code
         ;
@@ -135,7 +137,6 @@ Sequest.prototype.__write = function (chunk, encoding, cb) {
           cb()
         })
       } else {
-        if (self.bufferStream) stream.pipe(self.bufferStream, {end:false})
         if (e) {
           if (!self.leaveOpen) self.connection.end()
           return self.emit('error', e)
