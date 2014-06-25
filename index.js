@@ -115,8 +115,10 @@ Sequest.prototype.__write = function (chunk, encoding, cb) {
         return cb(e)
       }
       self._pipeDests(stream)
-
-      stream.pipe(self.bufferStream, {end:false})
+      
+      // Don't buffer data that is not consumed when we are handling with callback interface
+      if (!self.cb) stream.pipe(self.bufferStream, {end:false})
+      
       var signal
         , code
         ;
