@@ -6,7 +6,7 @@ By default sequest will use your local `ssh-agent` to authenticate to remote hos
 
 ```javascript
 var sequest = require('sequest')
-sequest('root@127.0.0.1', 'ls' function (e, stdout) {
+sequest('root@127.0.0.1', 'ls', function (e, stdout) {
   if (e) throw e
   console.log(stdout.split('\n'))
 })
