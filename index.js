@@ -59,7 +59,7 @@ function Sequest (conn, opts, cb) {
   this.queue = []
   this.dests = []
   this.sources = []
-  this.bufferStream = new stream.PassThrough()
+  this.writeLength = 0
 
   if (conn._state !== 'authenticated') {
     var self = this
@@ -105,9 +105,20 @@ Sequest.prototype.onConnectionReady = function () {
 }
 Sequest.prototype.__write = function (chunk, encoding, cb) {
   var self = this
+  this.writeLength = this.writeLength - 1
+
+  if (this.opts.continuous) {
+    var _cb = cb
+    cb = function () {
+      if (self.writeLength === 0 && self.__ended) self.emit('end')
+      return _cb.apply(_cb, arguments)
+    }
+  }
+
   if (this.opts.command || this.opts.continuous) {
     var cmd = chunk.toString()
     this.executing = true
+    this.emit('cmd', cmd)
     this.connection.exec(cmd, function (e, stream) {
       self.executing = false
       if (e) {
@@ -116,7 +127,8 @@ Sequest.prototype.__write = function (chunk, encoding, cb) {
       }
       self._pipeDests(stream)
 
-      stream.pipe(self.bufferStream, {end:false})
+      if (stream.stderr) stream.stderr.pipe(process.stderr)
+
       var signal
         , code
         ;
@@ -155,8 +167,6 @@ Sequest.prototype.__write = function (chunk, encoding, cb) {
         })
       }
     })
-  } else if (this.path) {
-    // TODO: implement sftp push
   }
 }
 Sequest.prototype._write = function (chunk, encoding, cb) {
@@ -166,8 +176,12 @@ Sequest.prototype._write = function (chunk, encoding, cb) {
     this.__write(chunk, encoding, cb)
   }
 }
+Sequest.prototype.write = function () {
+  if (this.opts.continuous) this.writeLength = this.writeLength + 1
+  stream.Duplex.prototype.write.apply(this, arguments)
+}
 Sequest.prototype._read = function (size) {
-  return this.bufferStream.read(size)
+  return null
 }
 Sequest.prototype.pipe = function () {
   this.dests.push(arguments[0])
@@ -180,6 +194,7 @@ Sequest.prototype._pipeDests = function (stream) {
 }
 Sequest.prototype.end = function () {
   if (!this.leaveOpen) this.connection.end()
+  this.__ended = true
   stream.Duplex.prototype.end.apply(this, arguments)
 }
 
@@ -195,7 +210,7 @@ module.exports.connect = function (host, opts) {
       , r = sequest.apply(sequest, args)
       ;
     r.leaveOpen = true
-    if (r.onCall) r.onCall(r)
+    if (ret.onCall) ret.onCall(r)
     if (ret.onError) r.on('error', ret.onError)
     return r
   }
@@ -205,7 +220,7 @@ module.exports.connect = function (host, opts) {
       , r = sequest.put.apply(sequest, args)
       ;
     r.leaveOpen = true
-    if (r.onCall) r.onCall(r)
+    if (ret.onPut) ret.onPut(r)
     if (ret.onError) r.on('error', ret.onError)
     return r
   }
@@ -214,7 +229,7 @@ module.exports.connect = function (host, opts) {
       , r = sequest.get.apply(sequest, args)
       ;
     r.leaveOpen = true
-    if (r.onCall) r.onCall(r)
+    if (ret.onGet) ret.onGet(r)
     if (ret.onError) r.on('error', ret.onError)
     return r
   }
