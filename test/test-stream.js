@@ -59,7 +59,6 @@ tape('error in middle', function (t) {
     s.write(command)
     s.on('error', function (e) {
       var outs = output.toString()
-      outs = outs.slice(0, outs.lastIndexOf('\n', outs.length-2)+1)
       t.equal(outs, expected)
     })
   })
