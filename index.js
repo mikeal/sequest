@@ -37,6 +37,7 @@ function getConnection (str, opts) {
 
   if (opts.privateKey) {
     copts.privateKey = opts.privateKey
+    if (opts.passphrase) copts.passphrase = opts.passphrase
   } else {
     copts.agent = opts.agent || process.env.SSH_AUTH_SOCK
   }
