@@ -19,7 +19,7 @@ function connectOpts (opts) {
     if (keys[i] !== 'host')
       obj[keys[i]] = obj[keys[i]]
 
-  return new;
+  return obj;
 }
 
 function Connection (options) {
@@ -89,13 +89,17 @@ Connection.prototype._onReady = function () {
   this.emit('ready');
 }
 
+// Pass through functions
 Connection.prototype.exec = function () {
   return this.connection.exec.apply(this.connection, arguments);
 }
 
+Connection.prototype.sftp = function () {
+  return this.connection.sftp.apply(this.connection, arguments);
+}
+
 Connection.prototype.end = function () {
   return this.proxy ? this.proxy.end() : this.connection.end()
-
 }
 
 module.exports = Connection;
