@@ -1,16 +1,17 @@
-var Connection = require('ssh2')
+var Connection = require('./connection')
   , stream = require('stream')
   , util = require('util')
   , bl = require('bl')
   , once = require('once')
+  , extend = util._extend
   ;
 
-function getConnection (str, opts) {
+function parseConnection (str) {
   var user = 'root'
     , port = 22
     , host
     ;
-  opts = opts || {}
+
   if (str.indexOf('@') !== -1) {
     user = str.slice(0, str.indexOf('@'))
     str = str.slice(str.indexOf('@')+1)
@@ -21,20 +22,31 @@ function getConnection (str, opts) {
     str = str.slice(0, str.indexOf(':'))
   }
   host = str
-  var conn = new Connection()
-    , copts =
-      { host: host,
-        port: port,
-        username: user
-      }
-    ;
+
+  return {
+    host: host,
+    port: port,
+    username: user
+  }
+}
+
+function getConnection (str, opts) {
+  opts = opts || {}
+
+  var copts = typeof str === 'string' ? parseConnection(str) : str
+
   if (opts.privateKey) {
     copts.privateKey = opts.privateKey
   } else {
     copts.agent = opts.agent || process.env.SSH_AUTH_SOCK
   }
 
-  conn.connect(copts)
+  if (opts.proxy) {
+    copts.proxy = parseConnection(opts.proxy);
+  }
+
+  var conn = new Connection(copts)
+
   return conn
 }
 
