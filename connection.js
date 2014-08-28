@@ -99,6 +99,7 @@ Connection.prototype.sftp = function () {
 }
 
 Connection.prototype.end = function () {
+  this._state = 'closed'
   return this.proxy ? this.proxy.end() : this.connection.end()
 }
 
