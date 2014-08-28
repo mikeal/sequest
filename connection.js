@@ -17,7 +17,8 @@ function connectOpts (opts) {
 
   for(var i=0; i<length; i++)
     if (keys[i] !== 'host')
-      obj[keys[i]] = obj[keys[i]]
+      obj[keys[i]] = opts[keys[i]]
+
 
   return obj;
 }
@@ -73,7 +74,7 @@ Connection.prototype._onProxyConnect = function () {
     ;
 
   this.connection = new SSH()
-  this.proxy.exec(['nc', host, port],join(' '), function (err, stream) {
+  this.proxy.exec(['nc', host, port].join(' '), function (err, stream) {
     if (err) {
       self.emit('error', err)
       return self.proxy.end()
