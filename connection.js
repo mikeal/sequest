@@ -35,8 +35,11 @@ function Connection (options) {
   // simulate state of underlying connections
   this._state = 'closed'
 
-  if (this.proxyOpts && options.privateKey)
+  if (this.proxyOpts && options.privateKey) {
     this.proxyOpts.privateKey = options.privateKey
+    if (options.passphrase)
+      this.proxyOpts.passphrase = options.passphrase
+  }
 
   if (this.proxyOpts)
     this.proxyConnect()
