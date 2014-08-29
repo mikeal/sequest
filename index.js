@@ -53,13 +53,12 @@ function getConnection (str, opts) {
 
 function Sequest (conn, opts, cb) {
   stream.Duplex.call(this)
-  if (!opts) {
-    opts = {continuous:true}
+  opts = opts || {}
+  if (typeof opts === 'string') {
+    if (opts[0] === '/') opts = {path:opts} // file path
+    else opts = {command:opts}
   } else {
-    if (typeof opts === 'string') {
-      if (opts[0] === '/') opts = {path:opts} // file path
-      else opts = {command:opts}
-    }
+    if (!opts.command) opts.continuous = true
   }
 
   if (typeof conn === 'string') {
