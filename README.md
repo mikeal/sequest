@@ -43,6 +43,35 @@ The most common are listed below.
 
 * **publicKey** - < _mixed_ > - Optional Buffer or string that contains a public key for key-based user authentication (OpenSSH format). If `publicKey` is not set, it will be generated from the `privateKey`. **Default:** (none)
 
+#### Custom options
+
+* **proxy** - < _string_ > - Host to proxy connection through. **Default:** (none) :: (e.g `root@72.9.543.901`)
+
+### Using options
+
+```javascript
+var fs = require('fs')
+var sequest = require('sequest')
+// Load privateKey synchronously
+var key = fs.readFileSync(process.env.HOME + '/.ssh/id_rsa')
+
+// Callback API
+sequest('root@10.555.44.99', {
+  command: 'uptime',
+  proxy: 'root@72.9.543.901',
+  privateKey: key
+  }, function (err, stdout) {
+    if (err) console.error(err)
+    console.log(stdout)
+})
+
+// Streaming api
+var seq = sequest('root@19.555.44.99', { proxy: 'root@72.9.543.901'})
+seq.pipe(process.stdout);
+seq.write('ifconfig')
+
+```
+
 ## `.connect(host[, opts])`
 
 Convenience API for making several calls to the same host.
