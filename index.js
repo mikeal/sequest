@@ -41,6 +41,10 @@ function getConnection (str, opts) {
   } else {
     copts.agent = opts.agent || process.env.SSH_AUTH_SOCK
   }
+  
+  if (opts.passphrase) {
+    copts.passphrase = opts.passphrase;
+  }
 
   if (opts.proxy) {
     copts.proxy = parseConnection(opts.proxy);
