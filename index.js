@@ -46,6 +46,10 @@ function getConnection (str, opts) {
     copts.proxy = parseConnection(opts.proxy);
   }
 
+  if (opts.password) {
+  	copts.password = opts.password;
+  }
+
   var conn = new Connection(copts)
 
   return conn
