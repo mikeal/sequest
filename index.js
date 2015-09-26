@@ -278,7 +278,7 @@ util.inherits(SequestPut, stream.PassThrough)
 SequestPut.prototype.onConnectionReady = function () {
   var self = this
   this.connection.sftp(function (err, sftp) {
-    if (err) self.emit('error', err)
+    if (err) return self.emit('error', err)
     var stream = sftp.createWriteStream(self.path, self.opts)
     self.pipe(stream)
     self.stream = stream
@@ -299,7 +299,7 @@ util.inherits(SequestGet, SequestPut)
 SequestGet.prototype.onConnectionReady = function () {
   var self = this
   this.connection.sftp(function (err, sftp) {
-    if (err) self.emit('error', err)
+    if (err) return self.emit('error', err)
     var stream = sftp.createReadStream(self.path, self.opts)
     stream.pipe(self)
     self.stream = stream
