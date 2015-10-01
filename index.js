@@ -186,15 +186,16 @@ Sequest.prototype.__write = function (chunk, encoding, cb) {
     stream.once('exit', function(_code, _signal) {
       exited = true
 
-      if (ended) return cb(_code, _signal)
-
       code = _code
       signal = _signal
+
+      if (ended && exited) cb(code, signal)
     })
 
     stream.once('end', function() {
       ended = true
-      if (exited) cb(code, signal)
+
+      if (ended && exited) cb(code, signal)
     })
   }
 }
