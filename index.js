@@ -285,7 +285,7 @@ SequestPut.prototype.onConnectionReady = function () {
     stream.on('error', function (e) {
       self.emit('error', e)
     })
-    stream.on('close', function () {
+    stream.on('finish', function () {
       self.emit('close')
       if (!self.leaveOpen) self.connection.end()
     })
