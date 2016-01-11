@@ -267,6 +267,7 @@ function SequestPut (conn, opts, path) {
   }
 
   this.connection = conn
+  this.connection.on('error', this.emit.bind(this, 'error'))
   this.opts = opts
   this.path = path
   var self = this
