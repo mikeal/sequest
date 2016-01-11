@@ -50,6 +50,10 @@ function getConnection (str, opts) {
   	copts.password = opts.password;
   }
 
+  if(opts.readyTimeout) {
+    copts.readyTimeout = opts.readyTimeout;
+  }
+
   var conn = new Connection(copts)
 
   return conn
