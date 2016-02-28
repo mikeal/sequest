@@ -267,11 +267,11 @@ function SequestPut (conn, opts, path) {
   }
 
   this.connection = conn
-  this.connection.on('error', this.emit.bind(this, 'error'))
   this.opts = opts
   this.path = path
   var self = this
   if (conn._state !== 'authenticated') {
+    this.connection.on('error', this.emit.bind(this, 'error'))
     this.connection.on('ready', this.onConnectionReady.bind(this))
   } else {
     process.nextTick(function () {
