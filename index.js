@@ -50,6 +50,10 @@ function getConnection (str, opts) {
   	copts.password = opts.password;
   }
 
+  if(opts.readyTimeout) {
+    copts.readyTimeout = opts.readyTimeout;
+  }
+
   var conn = new Connection(copts)
 
   return conn
@@ -267,6 +271,7 @@ function SequestPut (conn, opts, path) {
   this.path = path
   var self = this
   if (conn._state !== 'authenticated') {
+    this.connection.on('error', this.emit.bind(this, 'error'))
     this.connection.on('ready', this.onConnectionReady.bind(this))
   } else {
     process.nextTick(function () {
