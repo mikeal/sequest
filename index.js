@@ -70,7 +70,7 @@ function Sequest (conn, opts, cb) {
   }
 
   if (typeof conn === 'string') {
-    var conn = getConnection(conn, opts)
+    conn = getConnection(conn, opts)
   }
 
   this.connection = conn
