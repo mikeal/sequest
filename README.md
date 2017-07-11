@@ -1,5 +1,7 @@
 ## Sequest -- Simple ssh client
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/mikeal/sequest.svg)](https://greenkeeper.io/)
+
 ## `sequest(host[, command[, opts]])`
 
 By default sequest will use your local `ssh-agent` to authenticate to remote hosts which should make it unnecessary to enter username, password or privateKey information.
