@@ -6,7 +6,7 @@
   "dependencies": {
     "bl": "^0.9.4",
     "once": "^1.3.2",
-    "ssh2": "^0.4.8"
+    "ssh2": "^0.8.9"
   },
   "devDependencies": {
     "rimraf": "^2.3.3",
