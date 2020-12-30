@@ -1,6 +1,6 @@
 {
   "name": "sequest",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Simplified API for SSH and SFTP similar to request.",
   "main": "index.js",
   "dependencies": {
