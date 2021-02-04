@@ -47,6 +47,15 @@ The most common are listed below.
 
 * **proxy** - < _string_ > - Host to proxy connection through. **Default:** (none) :: (e.g `root@72.9.543.901`)
 
+#### Using non standard port
+```javascript
+var sequest = require('sequest')
+sequest('root@127.0.0.1:2225', 'ls', function (e, stdout) {
+  if (e) throw e
+  console.log(stdout.split('\n'))
+})
+```
+
 ### Using options
 
 ```javascript
