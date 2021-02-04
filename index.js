@@ -152,6 +152,7 @@ Sequest.prototype.__write = function (chunk, encoding, cb) {
       var signal
         , code
         ;
+      code = 0;
       if (self.cb) {
         var stdout = bl()
           , stderr = bl()
